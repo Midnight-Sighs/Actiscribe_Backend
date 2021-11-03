@@ -1,0 +1,268 @@
+[
+    
+    {
+        "model": "actiscribe.Resident",
+        "pk": -1,
+        "fields": {
+            "user": 1,
+            "r_first_name": "John",
+            "r_last_name": "Doe",
+            "r_other_identifier": "1A", 
+            "is_active": true ,
+            "is_archived": false,
+            "last_assessment": "01012021"
+        }
+    },
+    
+    {
+    "model": "actiscribe.Resident",
+        "pk": -2,
+        "fields": {
+            "user": 1,
+            "r_first_name": "Jane",
+            "r_last_name": "Doe",
+            "r_other_identifier": "2A", 
+            "is_active": true,
+            "is_archived": false,
+            "last_assessment": "04012021"
+        }
+    },
+
+    {
+        "model": "actiscribe.Resident",
+            "pk": -3,
+            "fields": {
+                "user": 1,
+                "r_first_name": "Bob",
+                "r_last_name": "Smith",
+                "r_other_identifier": "3A", 
+                "is_active": true,
+                "is_archived": false,
+                "last_assessment": "01012021"
+            }
+    },
+
+    {
+        "model": "actiscribe.Resident",
+            "pk": -4,
+            "fields": {
+                "user": 1,
+                "r_first_name": "Randy",
+                "r_last_name": "Smith",
+                "r_other_identifier": "3A", 
+                "is_active": false,
+                "is_archived": true,
+                "last_assessment": "05012021"
+            }
+    },
+
+    {
+        "model": "actiscribe.Resident",
+            "pk": -5,
+            "fields": {
+                "user": 1,
+                "r_first_name": "Lady",
+                "r_last_name": "Maam",
+                "r_other_identifier": "2B", 
+                "is_active": true,
+                "is_archived": false,
+                "last_assessment": "07012021"
+            }
+    },
+
+    {
+        "model": "actiscribe.Activity",
+            "pk": -1,
+            "fields":{
+                "user": 1,
+                "name": "Tai Chi",
+                "is_active": true,
+                "is_archived":false,
+                "dow_one": "Physical"
+            }
+    },
+
+    {
+        "model": "actiscribe.Activity",
+            "pk": -2,
+            "fields":{
+                "user": 1,
+                "name": "Church Support Group",
+                "is_active": true,
+                "is_archived":false,
+                "dow_one": "Emotional",
+                "dow_two": "Spitirual"
+            }
+    },
+
+    {
+        "model": "actiscribe.Activity",
+            "pk": -3,
+            "fields":{
+                "user": 1,
+                "name": "Seated Yoga",
+                "is_active": true,
+                "is_archived":false,
+                "dow_one": "Physical"
+            }
+    },
+
+    {
+        "model": "actiscribe.Activity",
+            "pk": -4,
+            "fields":{
+                "user": 1,
+                "name": "Group Crossword Puzzles",
+                "is_active": true,
+                "is_archived":false,
+                "dow_one": "Intellectual"
+            }
+    },
+
+    {
+        "model": "actiscribe.Activity",
+            "pk": -5,
+            "fields":{
+                "user": 1,
+                "name": "Group Crossword Puzzles",
+                "is_active": true,
+                "is_archived":false,
+                "dow_one": "Intellectual"
+            }
+    },
+
+
+    {
+        "model": "actiscribe.Activity",
+            "pk": -6,
+            "fields":{
+                "user": 1,
+                "name": "Homemade Slime",
+                "is_active": true,
+                "is_archived":false,
+                "dow_one": "Creative",
+                "dow_two": "Sensory",
+                "dow_three": "Intellectual"
+            }
+    },
+
+
+    {
+        "model": "actiscribe.Activity",
+            "pk": -7,
+            "fields":{
+                "user": 1,
+                "name": "Christmas Decorating",
+                "is_active": true,
+                "is_archived":false,
+                "dow_one": "Environmental",
+                "dow_two": "Occupational",
+                "dow_three": "Creative"
+            }
+    },
+
+    {
+        "model": "actiscribe.Activity",
+            "pk": -8,
+            "fields":{
+                "user": 1,
+                "name": "Baked Dog Treats for Shelter",
+                "is_active": false,
+                "is_archived":true,
+                "dow_one": "Creative",
+                "dow_two": "Occupational"
+            }
+    },
+    
+    {
+        "model": "actiscribe.Participation",
+            "pk":-1,
+            "fields": {
+                "activity": -7,
+                "resident": -2,
+                "date": "07012021"
+            }
+    },
+
+    {
+        "model": "actiscribe.Participation",
+            "pk":-2,
+            "fields": {
+                "activity": -7,
+                "resident": -3,
+                "date": "07012021"
+            }
+    },
+
+    {
+        "model": "actiscribe.Participation",
+            "pk":-3,
+            "fields": {
+                "activity": -1,
+                "resident": -1,
+                "date": "07012021"
+            }
+    },
+
+    {
+        "model": "actiscribe.Participation",
+            "pk":-4,
+            "fields": {
+                "activity": -1,
+                "resident": -3,
+                "date": "07022021"
+            }
+    },
+
+    {
+        "model": "actiscribe.Note",
+            "pk": -1,
+            "fields":{
+                "resident": -1,
+                "note_date": "04052021",
+                "content": "Joe did well today but showed abnormal weakness in his left ankle.  Notified nurse, but will watch for activity deficeit as a result"
+            }
+    },
+
+    {
+        "model": "actiscribe.Note",
+            "pk": -2,
+            "fields":{
+                "resident": -3,
+                "note_date": "03031021",
+                "content": "Bob participated in no activities today, but had a short conversation with him where he expressed interest in a book club."
+            }
+    },
+
+    {
+        "model": "actiscribe.Assessment",
+            "pk": -1,
+            "fields":{
+                "resident": -2,
+                "nickname": "Janey",
+                "games_yn": "Likes puzzles games",
+                "books_yn": "no",
+                "music_yn": "Yes, all sorts of oldies, no modern",
+                "crafts_yn": "Used to embroider, unable to do so anymore.",
+                "learning_yn": "Suppose not, anymore",
+                "gardening":"no",
+                "sports_yn":"Likes to watch basketball",
+                "exercise_yn": "No",
+                "outside_yn": "Only when it's hot",
+                "animals_yn": "Like dogs, miss owning them.  Had many through her life.",
+                "socializing_yn": "Some",
+                "work": "Was a social worker for most of her career.",
+                "volunteer": "Did some work at a soup kitchen on free weekends",
+                "parents": "Dad worked in farming, mom was a homemaker",
+                "siblings": "4 siblings.  2 still living, one close, the other farther away.",
+                "close_family": "Not related, but best friend is like family.  Calls daily.",
+                "spouse": "Married to her career, never married.",
+                "children": "No children.  Helped to raise nieces and nephews.",
+                "technology": "Has a smart TV and smart phone.  Able to use with minimal assitance",
+                "city_or_country": "Grew up in the country but grew to prefer the city life in young adulthood.",
+                "travel": "Traveled to different spots all over the world.  Every year or two she took an international vacation.  Traveled to see family multiple times a year.",
+                "social_fun": "Going out on the town, but that was mostly younger years.  With age, bingo nights and bridge",
+                "one_thing": "That as old as I've gotten, there's a young gal hiding in here."
+            }
+    }
+]
