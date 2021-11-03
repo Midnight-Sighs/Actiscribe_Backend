@@ -14,11 +14,11 @@ class Resident(models.Model):
     r_other_identifier = models.TextField(max_length=20)
     is_active = models.BooleanField(default=True)
     is_archived = models.BooleanField(default=False)
-    last_assessment = models.DateField
+    last_assessment = models.DateField()
 
 class Note(models.Model):
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
-    note_date = models.DateField
+    note_date = models.DateField()
     content = models.TextField(max_length=400)
 
 class Activity(models.Model):
@@ -33,7 +33,7 @@ class Activity(models.Model):
 class Participation(models.Model):
     activity = models.ForeignKey('Activity', on_delete=models.CASCADE)
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
-    date = models.DateField
+    date = models.DateField()
 
 class Assessment(models.Model):
     resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
