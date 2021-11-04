@@ -13,7 +13,7 @@ class ResidentSerializer(serializers.ModelSerializer):
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
-        fields = ['resident', 'note_date', 'content']
+        fields = ['resident_id', 'note_date', 'content']
 
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:

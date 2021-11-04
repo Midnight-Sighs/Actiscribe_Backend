@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import status
+from rest_framework.serializers import SerializerMetaclass
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -73,7 +74,7 @@ def get_resident_byId(request, id):
         serializer = ResidentSerializer(resident, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == 'PATCH':
@@ -84,4 +85,37 @@ def get_resident_byId(request, id):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serliazer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def get_notes_byResident(request, id):
+    if request.method == 'GET':
+        notes = Note.objects.filter(resident_id = id)
+        serializer = NoteSerializer(notes, many=True)
+        return Response(serializer.data)
+
+    if request.method == 'POST':
+        serializer = NoteSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(resident_id = id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE', 'PUT'])
+@permission_classes([IsAuthenticated])
+def get_notes_byId(request, note_id):
+    if request.method == 'DELETE':
+        note = Note.objects.get(id = note_id)
+        note.delete()
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    if request.method == 'PUT':
+        note = Note.objects.get(id = note_id)
+        serializer = NoteSerializer(note, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+    return Response(status=status.HTTP_400_BAD_REQUEST)
