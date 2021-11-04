@@ -106,13 +106,6 @@ def get_notes_by_id(request, note_id):
 
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
-api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def residents_by_activity(request, id):
-    activities = Activity.objects.filter(resident_id = id)
-    serializer = ActivitySerializer(activities, many=True)
-    return Response(serializer.data)
-
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def get_all_activities(request):
@@ -163,3 +156,31 @@ def activities_by_dow(request, dow):
         activity = activity_one | activity_two | activity_three
         serializer = ActivitySerializer(activity, many=True)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+@api_view(['GET', 'POST', 'DELETE', 'PUT'])
+@permission_classes([IsAuthenticated])
+def assessments(request, id):
+    if request.method == 'GET':
+        assessment = Assessment.objects.get(resident_id = id)
+        serializer = AssessmentSerializer(assessment)
+        return Response(serializer.data)
+
+    if request.method == 'POST':
+        serializer = AssessmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(resident_id = id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == 'DELETE':
+        assessment = Assessment.objects.get(resident_id = id)
+        assessment.delete()
+        return Response(status=status.HTTP_200_OK)
+
+    if request.method == 'PUT':
+        assessment = Assessment.objects.get(resident_id = id)
+        serializer = AssessmentSerializer(assessment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
