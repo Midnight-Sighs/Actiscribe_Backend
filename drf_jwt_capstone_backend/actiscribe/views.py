@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import OR, IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
+from itertools import chain
 
 from .models import Resident
 from .models import Note
@@ -184,3 +185,72 @@ def assessments(request, id):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def resident_participation (request, id):
+    if request.method == 'GET':
+        participation = Participation.objects.all().filter(resident_id = id)
+        activities = []
+        for each in participation:
+            activity = Activity.objects.get(id = each.id)
+            activities.append(activity)
+        serializer = ParticipationSerializer(participation, many=True)
+        aserializer=ActivitySerializer(activities, many=True)
+        return Response({"activity": aserializer.data, "participation": serializer.data})
+        # return Response(chain(aserializer.data, serializer.data))
+
+    if request.method == 'POST':
+        activity = request.data.get('name')
+        activity_by_name = Activity.objects.get(name = activity)
+        activity_by_id = activity_by_name.id
+        serializer = ParticipationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(resident_id = id, activity_id = activity_by_id)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def activity_participation (request, id):
+    if request.method == 'GET':
+        participation = Participation.objects.all().filter(activity_id = id)
+        residents = []
+        for each in participation:
+            resident = Resident.objects.get(id = each.id)
+            residents.append(resident)
+        serializer = ParticipationSerializer(participation, many=True)
+        rserializer=ResidentSerializer(residents, many=True)
+        return Response({"resident": rserializer.data, "participation": serializer.data})
+    
+    if request.method == 'POST':
+        resident_fname = request.data.get('first_name')
+        resident_lname = request.data.get('last_name')
+        resident_identifier = request.data.get('identifier')
+        resident_by_name = Resident.objects.filter(r_first_name = resident_fname).filter(r_last_name = resident_lname).get(r_other_identifier = resident_identifier)
+        print({resident_by_name})
+        resident_by_id = resident_by_name.id
+        serializer = ParticipationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(activity_id = id, resident_id = resident_by_id)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def manage_participation(request, id):
+    if request.method == 'DELETE':
+        participation = Participation.objects.get(id = id)
+        participation.delete()
+        return Response(status=status.HTTP_200_OK)
+
+    if request.method == 'PATCH':
+        participation = Participation.objects.get(id = id)
+        serializer = ParticipationSerializer(participation, request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(response.data, status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)

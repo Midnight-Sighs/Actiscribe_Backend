@@ -23,7 +23,7 @@ class Note(models.Model):
 
 class Activity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.TextField(max_length=50)
+    name = models.TextField(max_length=50, unique=True)
     is_active = models.BooleanField(default=True)
     is_archived = models.BooleanField(default=False)
     dow_one = models.TextField(max_length=20)
@@ -31,8 +31,8 @@ class Activity(models.Model):
     dow_three = models.TextField(max_length=20, blank=True)
 
 class Participation(models.Model):
-    activity = models.ForeignKey('Activity', on_delete=models.CASCADE)
-    resident = models.ForeignKey('Resident', on_delete=models.CASCADE)
+    activity = models.ForeignKey('Activity', related_name='activity', on_delete=models.CASCADE)
+    resident = models.ForeignKey('Resident', related_name='resident', on_delete=models.CASCADE)
     date = models.DateField()
 
 class Assessment(models.Model):
