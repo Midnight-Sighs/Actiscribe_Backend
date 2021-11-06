@@ -8,7 +8,7 @@ from .models import Assessment
 class ResidentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resident
-        fields = ['r_first_name', 'r_last_name', 'r_other_identifier', 'is_active', 'is_archived', 'last_assessment']
+        fields = ['id','r_first_name', 'r_last_name', 'r_other_identifier', 'is_active', 'is_archived', 'last_assessment']
 
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,7 +18,7 @@ class NoteSerializer(serializers.ModelSerializer):
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
-        fields = ['name', 'is_active', 'is_archived', 'dow_one', 'dow_two', 'dow_three']
+        fields = ['id', 'name', 'is_active', 'is_archived', 'dow_one', 'dow_two', 'dow_three']
 
 class ParticipationSerializer(serializers.ModelSerializer):
     class Meta: 
