@@ -194,8 +194,9 @@ def resident_participation (request, id):
         participation = Participation.objects.all().filter(resident_id = id)
         activities = []
         for each in participation:
-            activity = Activity.objects.get(id = each.id)
+            activity = Activity.objects.get(id = each.activity_id)
             activities.append(activity)
+        print(len(activities))
         serializer = ParticipationSerializer(participation, many=True)
         aserializer=ActivitySerializer(activities, many=True)
         return Response({"activity": aserializer.data, "participation": serializer.data})
@@ -252,5 +253,5 @@ def manage_participation(request, id):
         serializer = ParticipationSerializer(participation, request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(response.data, status=status.HTTP_202_ACCEPTED)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
