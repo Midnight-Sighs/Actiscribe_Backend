@@ -111,7 +111,7 @@ def get_notes_by_id(request, note_id):
 @permission_classes([IsAuthenticated])
 def get_all_activities(request):
     if request.method == 'GET':
-        activities = Activity.objects.filter(user = request.user)
+        activities = Activity.objects.filter(user = request.user).filter(is_active=True)
         serializer = ActivitySerializer(activities, many=True)
         return Response (serializer.data)
 
@@ -121,6 +121,13 @@ def get_all_activities(request):
             serializer.save(user = request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_archived_activities(request):
+    activities= Activity.objects.filter(user_id=request.user.id).filter(is_archived=True)
+    serializer=ActivitySerializer(activities, many=True)
+    return Response(serializer.data)
 
 @api_view(['PUT', 'DELETE', 'PATCH'])
 @permission_classes([IsAuthenticated])

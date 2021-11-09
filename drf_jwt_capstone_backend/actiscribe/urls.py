@@ -1,9 +1,6 @@
 from django.urls import path
 from actiscribe import views
 
-# urlpatterns = [
-#     path('', views.ResidentList.as_view())
-# ]
 
 urlpatterns = [
     path('residents/', views.get_all_residents),
@@ -14,6 +11,7 @@ urlpatterns = [
     path('residents/<id>/participation/',views.resident_participation),
     path('notes/<note_id>/', views.get_notes_by_id),
     path('activities/', views.get_all_activities),
+    path('activities/archived/', views.get_archived_activities),
     path('activities/<id>/', views.edit_activities),
     path('activities/<id>/participation/', views.activity_participation),
     path('<dow>/', views.activities_by_dow),
