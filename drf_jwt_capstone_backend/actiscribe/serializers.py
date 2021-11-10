@@ -18,7 +18,7 @@ class NoteSerializer(serializers.ModelSerializer):
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
-        fields = ['id', 'name', 'is_active', 'is_archived', 'dow_one', 'dow_two', 'dow_three']
+        fields = ['id', 'name','description', 'is_active', 'is_archived', 'dow_one', 'dow_two', 'dow_three']
 
 class ParticipationSerializer(serializers.ModelSerializer):
     class Meta: 

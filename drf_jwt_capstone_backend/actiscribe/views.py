@@ -227,7 +227,7 @@ def activity_participation (request, id):
         participation = Participation.objects.all().filter(activity_id = id)
         residents = []
         for each in participation:
-            resident = Resident.objects.get(id = each.id)
+            resident = Resident.objects.get(id = each.resident_id)
             residents.append(resident)
         serializer = ParticipationSerializer(participation, many=True)
         rserializer=ResidentSerializer(residents, many=True)

@@ -23,7 +23,8 @@ class Note(models.Model):
 
 class Activity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.TextField(max_length=50, unique=True)
+    name = models.TextField(max_length=50)
+    description = models.TextField(max_length=250, blank=True)
     is_active = models.BooleanField(default=True)
     is_archived = models.BooleanField(default=False)
     dow_one = models.TextField(max_length=20)
