@@ -9,6 +9,7 @@ urlpatterns = [
     path('residents/<id>/notes/', views.get_notes_by_resident),
     path('residents/<id>/assessment/', views.assessments),
     path('residents/<id>/participation/',views.resident_participation),
+    path('residents/<id>/archive/', views.archive_resident),
     path('notes/<note_id>/', views.get_notes_by_id),
     path('activities/', views.get_all_activities),
     path('activities/archived/', views.get_archived_activities),

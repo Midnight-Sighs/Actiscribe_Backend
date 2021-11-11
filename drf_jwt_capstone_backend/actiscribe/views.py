@@ -49,7 +49,7 @@ def get_archived_residents(request):
     serializer = ResidentSerializer(residents, many=True)
     return Response(serializer.data)
 
-@api_view(['GET', 'PUT', 'PATCH'])
+@api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def get_resident_by_id(request, id):
     if request.method == 'GET':
@@ -65,6 +65,10 @@ def get_resident_by_id(request, id):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+@api_view(['PATCH'])
+@permission_classes([AllowAny])
+def archive_resident(request, id):
     if request.method == 'PATCH':
         resident = Resident.objects.get(id = id)
         resident.is_active = not resident.is_active
@@ -130,7 +134,7 @@ def get_archived_activities(request):
     return Response(serializer.data)
 
 @api_view(['PUT', 'DELETE', 'PATCH'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def edit_activities(request, id):
     if request.method=='PUT':
         activity = Activity.objects.get(id = id)
