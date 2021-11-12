@@ -23,7 +23,7 @@ class ActivitySerializer(serializers.ModelSerializer):
 class ParticipationSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Participation
-        fields = ['activity_id', 'resident_id', 'date']
+        fields = ['id', 'activity_id', 'resident_id', 'date']
 
 class AssessmentSerializer(serializers.ModelSerializer):
     class Meta: 
