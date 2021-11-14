@@ -251,9 +251,18 @@ def activity_participation (request, id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-@api_view(['PATCH', 'DELETE'])
+@api_view(['GET', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def manage_participation(request, id):
+    if request.method =='GET':
+        participation=Participation.objects.get(id=id)
+        activity=Activity.objects.get(id = participation.activity_id)
+        resident=Resident.objects.get(id = participation.resident_id)
+        pserializer=ParticipationSerializer(participation)
+        aserializer=ActivitySerializer(activity)
+        rserializer=ResidentSerializer(resident)
+        return Response({"participation":pserializer.data, "activity":aserializer.data, "resident":rserializer.data})
+
     if request.method == 'DELETE':
         participation = Participation.objects.get(id = id)
         participation.delete()
