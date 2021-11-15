@@ -162,9 +162,9 @@ def edit_activities(request, id):
 @permission_classes([IsAuthenticated])
 def activities_by_dow(request, dow):
     if request.method == 'GET':
-        activity_one = Activity.objects.all().filter(is_active = True).filter(dow_one = dow)
-        activity_two = Activity.objects.all().filter(is_active = True).filter(dow_two = dow)
-        activity_three = Activity.objects.all().filter(is_active = True).filter(dow_three = dow)
+        activity_one = Activity.objects.all().filter(user_id = request.user.id).filter(is_active = True).filter(dow_one = dow)
+        activity_two = Activity.objects.all().filter(user_id = request.user.id).filter(is_active = True).filter(dow_two = dow)
+        activity_three = Activity.objects.all().filter(user_id = request.user.id).filter(is_active = True).filter(dow_three = dow)
         activity = activity_one | activity_two | activity_three
         serializer = ActivitySerializer(activity, many=True)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
