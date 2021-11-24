@@ -214,12 +214,13 @@ def resident_participation (request, id):
         # return Response(chain(aserializer.data, serializer.data))
 
     if request.method == 'POST':
-        activity = request.data.get('name')
-        activity_by_name = Activity.objects.get(name = activity)
-        activity_by_id = activity_by_name.id
+        activity = request.data.get('id')
+        # print(activity)
+        # activity_by_id = Activity.objects.get(id = activity)
+        # print(activity_by_id)
         serializer = ParticipationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(resident_id = id, activity_id = activity_by_id)
+            serializer.save(resident_id = id, activity_id = activity)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
