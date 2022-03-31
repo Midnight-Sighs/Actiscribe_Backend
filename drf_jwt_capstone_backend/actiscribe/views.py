@@ -1,3 +1,4 @@
+from email.policy import HTTP
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.serializers import SerializerMetaclass
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import OR, IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from itertools import chain
+from django.contrib import messages
 
 from .models import Resident
 from .models import Note
@@ -22,7 +24,6 @@ from .serializers import AssessmentSerializer
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-
 # permission_classes = [AllowAny]     - means anyone can access this endpoint
 
 
@@ -33,51 +34,61 @@ def get_all_residents(request):
     if request.method == 'GET':
         residents = Resident.objects.filter(user_id = request.user.id).filter(is_active = True)
         serializer = ResidentSerializer(residents, many=True)
-        return Response(serializer.data)
+        if len(residents) == 0:
+            return Response(data={"message":"No Residents to Retrieve"}, status=status.HTTP_204_NO_CONTENT)
+        return Response(data={"data":serializer.data, "message": "Residents Retrieved Successfully"}, status=status.HTTP_200_OK)
 
     if request.method == 'POST':
         serializer = ResidentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user = request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data": serializer.data, "message": "Resident Created Successfully"}, status=status.HTTP_201_CREATED)
+        return Response(data={"errors":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_archived_residents(request):
     residents = Resident.objects.filter(user_id = request.user.id).filter(is_archived = True)
     serializer = ResidentSerializer(residents, many=True)
-    return Response(serializer.data)
+    if len(residents) == 0:
+        return Response(data={"message": "No Archived Residents to Retrieve"}, status=status.HTTP_204_NO_CONTENT)
+    return Response(data={"data": serializer.data, "message": "Archived Residents Retrieved Successfully"}, status=status.HTTP_200_OK)
 
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
 def get_resident_by_id(request, id):
     if request.method == 'GET':
+        msg = "No Resident Matches that Query"
         resident = Resident.objects.get(id = id)
+        if resident.user_id != request.user.id:
+            resident = None
+            msg = "Unauthorized to View"
         serializer = ResidentSerializer(resident)
-        return Response(serializer.data)
+        if not resident:
+            return Response(data={"message": msg})
+        return Response(data={"data":serializer.data, "message":f"Retrieved {resident.r_first_name}'s Data Succesfully"}, status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
         resident = Resident.objects.get(id = id)
-        serializer = ResidentSerializer(resident, data=request.data)
+        serializer = ResidentSerializer(resident, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data":serializer.data, "message":f"Resident {resident.r_first_name} Updated Successfully"}, status=status.HTTP_202_ACCEPTED)
+        return Response(data={"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['PATCH'])
 @permission_classes([AllowAny])
 def archive_resident(request, id):
     if request.method == 'PATCH':
-        resident = Resident.objects.get(id = id)
+        resident = Resident.objects.get(id = id, user_id= request.user.id)
         resident.is_active = not resident.is_active
         resident.is_archived = not resident.is_archived
         serializer = ResidentSerializer(resident, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data": serializer.data, "message":f"Resident {resident.r_first_name} Archived Successfully"}, status=status.HTTP_202_ACCEPTED)
+        return Response(data={"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -85,14 +96,16 @@ def get_notes_by_resident(request, id):
     if request.method == 'GET':
         notes = Note.objects.filter(resident_id = id)
         serializer = NoteSerializer(notes, many=True)
-        return Response(serializer.data)
+        if len(notes) == 0:
+            return Response(data={"data":serializer.data, "message": "No Notes to Retrieve"}, status=status.HTTP_204_NO_CONTENT)
+        return Response(data={"data": serializer.data, "message": "Notes retrieved successfully"}, status=status.HTTP_200_OK)
 
     if request.method == 'POST':
         serializer = NoteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(resident_id = id)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data": serializer.data, "message": "Note Created Successfully"}, status=status.HTTP_201_CREATED)
+        return Response(data={"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE', 'PUT'])
 @permission_classes([IsAuthenticated])
@@ -100,16 +113,15 @@ def get_notes_by_id(request, note_id):
     if request.method == 'DELETE':
         note = Note.objects.get(id = note_id)
         note.delete()
-        return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(data={"message":"Note Deleted Successfully"}, status=status.HTTP_202_ACCEPTED)
 
     if request.method == 'PUT':
         note = Note.objects.get(id = note_id)
         serializer = NoteSerializer(note, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data":serializer.data, "message": "Note Edited Successfully"}, status=status.HTTP_202_ACCEPTED)
+        return Response(data={"errors":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -117,21 +129,24 @@ def get_all_activities(request):
     if request.method == 'GET':
         activities = Activity.objects.filter(user = request.user).filter(is_active=True)
         serializer = ActivitySerializer(activities, many=True)
-        return Response (serializer.data)
+        return Response (data={"data": serializer.data}, status=status.HTTP_200_OK)
 
     if request.method == 'POST':
+        msg = "Activity Added Successfully"
         serializer = ActivitySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user = request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data": serializer.data, "message": msg}, status=status.HTTP_201_CREATED)
+        return Response(data={"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_archived_activities(request):
     activities= Activity.objects.filter(user_id=request.user.id).filter(is_archived=True)
     serializer=ActivitySerializer(activities, many=True)
-    return Response(serializer.data)
+    if len(activities)==0:
+        return Response(data={"message": "No Archived Activities to Retrieve"}, status=status.HTTP_204_NO_CONTENT)
+    return Response(data={"data":serializer.data,"message":"Archived Activities Retrieved Successfully"}, status=status.HTTP_200_OK)
 
 @api_view(['PUT', 'DELETE', 'PATCH'])
 @permission_classes([AllowAny])
@@ -141,12 +156,12 @@ def edit_activities(request, id):
         serializer=ActivitySerializer(activity, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            return Response(data={"data": serializer.data, "message":f"{activity.name} Edited Successfully"}, status=status.HTTP_202_ACCEPTED)
         
     if request.method=='DELETE':
         activity = Activity.objects.get(id = id)
         activity.delete()
-        return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(data={"message": "Activity Deleted Successfully"}, status=status.HTTP_202_ACCEPTED)
 
     if request.method=='PATCH':
         activity = Activity.objects.get(id = id)
@@ -155,8 +170,8 @@ def edit_activities(request, id):
         serializer = ActivitySerializer(activity, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(status=status.HTTP_202_ACCEPTED)
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data": serializer.data, "message": f"{activity.name} archived successfully."}, status=status.HTTP_202_ACCEPTED)
+    return Response(data={"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -167,7 +182,9 @@ def activities_by_dow(request, dow):
         activity_three = Activity.objects.all().filter(user_id = request.user.id).filter(is_active = True).filter(dow_three = dow)
         activity = activity_one | activity_two | activity_three
         serializer = ActivitySerializer(activity, many=True)
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        if not activity:
+            return Response(data={"data:":serializer.data, "message" :"No Activities Matching Your Query"}, status=status.HTTP_204_NO_CONTENT)
+        return Response(data={"data": serializer.data, "message": "Activities Filtered Successfully"}, status=status.HTTP_202_ACCEPTED)
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT'])
 @permission_classes([IsAuthenticated])
