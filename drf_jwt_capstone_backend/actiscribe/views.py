@@ -59,13 +59,15 @@ def get_archived_residents(request):
 def get_resident_by_id(request, id):
     if request.method == 'GET':
         msg = "No Resident Matches that Query"
+        stat = status.HTTP_400_BAD_REQUEST
         resident = Resident.objects.get(id = id)
         if resident.user_id != request.user.id:
             resident = None
             msg = "Unauthorized to View"
+            stat = status.HTTP_401_UNAUTHORIZED
         serializer = ResidentSerializer(resident)
         if not resident:
-            return Response(data={"message": msg})
+            return Response(data={"message": msg}, status=stat)
         return Response(data={"data":serializer.data, "message":f"Retrieved {resident.r_first_name}'s Data Succesfully"}, status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
@@ -192,28 +194,29 @@ def assessments(request, id):
     if request.method == 'GET':
         assessment = Assessment.objects.get(resident_id = id)
         serializer = AssessmentSerializer(assessment)
-        return Response(serializer.data)
+        if len(assessment==0):
+            return Response(data={"data": serializer.data, "message": "No Assessment to Retrieve"}, status=status.HTTP_204_NO_CONTENT)
+        return Response(data={"data": serializer.data, "message": "Assessment Retrieved Successfully"}, status=status.HTTP_200_OK)
 
     if request.method == 'POST':
         serializer = AssessmentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(resident_id = id)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data":serializer.data, "message": "Assessment Created Successfully"}, status=status.HTTP_201_CREATED)
+        return Response(data={"errors": serializer.errors, "message": "Assessment Creation Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == 'DELETE':
         assessment = Assessment.objects.get(resident_id = id)
         assessment.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(data={"message":"Assessment Deleted Successfully"}, status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
         assessment = Assessment.objects.get(resident_id = id)
         serializer = AssessmentSerializer(assessment, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response(data={"data": serializer.data, "message":"Assessment Edited Successfully"}, status=status.HTTP_202_ACCEPTED)
+        return Response(data={"errors": serializer.errors, "message": "Assessment Edit Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -227,14 +230,13 @@ def resident_participation (request, id):
         print(len(activities))
         serializer = ParticipationSerializer(participation, many=True)
         aserializer=ActivitySerializer(activities, many=True)
-        return Response({"activity": aserializer.data, "participation": serializer.data})
+        if len(serializer)==0 and len(aserializer)==0:
+            return Response(data={"data":{"activity":aserializer.data, "participation":serializer.data}, "message": "No Participation Retrieved"}, status=status.HTTP_204_NO_CONTENT)
+        return Response(data={"data":{"activity": aserializer.data, "participation": serializer.data}, "message":"Participation Retrieved Successfully"}, status=status.HTTP_202_ACCEPTED)
         # return Response(chain(aserializer.data, serializer.data))
 
     if request.method == 'POST':
         activity = request.data.get('id')
-        # print(activity)
-        # activity_by_id = Activity.objects.get(id = activity)
-        # print(activity_by_id)
         serializer = ParticipationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(resident_id = id, activity_id = activity)
