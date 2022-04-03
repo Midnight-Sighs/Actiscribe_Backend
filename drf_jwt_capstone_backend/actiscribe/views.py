@@ -240,8 +240,8 @@ def resident_participation (request, id):
         serializer = ParticipationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(resident_id = id, activity_id = activity)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data": serializer.data, "message":"Participation Retrieved Successfully"}, status=status.HTTP_200_OK)
+        return Response(data={"errors":serializer.errors, "message":"Error Retrieving Participation"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -255,7 +255,9 @@ def activity_participation (request, id):
             residents.append(resident)
         serializer = ParticipationSerializer(participation, many=True)
         rserializer=ResidentSerializer(residents, many=True)
-        return Response({"resident": rserializer.data, "participation": serializer.data})
+        if len(serializer) == 0 and len(rserializer) == 0:
+            return Response(data={"errors": serializer.errors, "data":serializer.data, "message":"No Participation to Retrieve"})
+        return Response(data={"data":{"resident": rserializer.data, "participation": serializer.data}, "message": "Participation Retrieved Successfully"})
     
     if request.method == 'POST':
         resident_fname = request.data.get('first_name')
@@ -267,8 +269,8 @@ def activity_participation (request, id):
         serializer = ParticipationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(activity_id = id, resident_id = resident_by_id)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data": serializer.data, "message": "Participation Retrieved Successfully"}, status=status.HTTP_200_OK)
+        return Response(data={"errors": serializer.errors, "message":"Error Retrieving Participation"}, status=status.HTTP_400_BAD_REQUEST)
     
 
 @api_view(['GET', 'PATCH', 'DELETE'])
@@ -281,17 +283,19 @@ def manage_participation(request, id):
         pserializer=ParticipationSerializer(participation)
         aserializer=ActivitySerializer(activity)
         rserializer=ResidentSerializer(resident)
-        return Response({"participation":pserializer.data, "activity":aserializer.data, "resident":rserializer.data})
+        if len(pserializer) ==0 and len(aserializer)==0 and len(rserializer)==0:
+            return Response(data={"data": {"participation":pserializer.data, "activity":aserializer.data, "resident":rserializer.data},"message":"No Participation to Retrieve", "errors":{"participation":pserializer.error, "activity":aserializer.errors, "resident":rserializer.errors}})
+        return Response(data={"data": {"participation":pserializer.data, "activity":aserializer.data, "resident":rserializer.data}, "message":"Participation Retrieved Successfully"})
 
     if request.method == 'DELETE':
         participation = Participation.objects.get(id = id)
         participation.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(data={"message": "Deleted Participation Successfully", },status=status.HTTP_200_OK)
 
     if request.method == 'PATCH':
         participation = Participation.objects.get(id = id)
         serializer = ParticipationSerializer(participation, request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"data": serializer.data, "message":"Participation Edited Successfully"}, status=status.HTTP_202_ACCEPTED)
+        return Response(data={"errors":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
